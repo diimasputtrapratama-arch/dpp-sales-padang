@@ -23,7 +23,7 @@ module.exports=async(q,s)=>{
  try{
   if(!RU||!RT)return J(503,{error:'Database belum dipasang (Upstash Redis)'});
   if(path==='/api/site'&&m==='GET'){const v=await r('GET','site');return J(200,v?JSON.parse(v):DEF)}
-  if(path==='/api/img'||path.startsWith('/uploads/')){
+  if(path==='/api/img'||path.startsWith('/uploads/')||(path==='/api'&&u.searchParams.get('id'))){
    const id=(u.searchParams.get('id')||path.split('/').pop()).replace(/\.\w+$/,'');if(!/^[a-f0-9]{16}$/.test(id))return J(404,{error:'x'});
    const v=await r('GET','img:'+id);if(!v)return J(404,{error:'x'});const[ct,b]=v.split('|');
    s.statusCode=200;s.setHeader('Content-Type',ct);s.setHeader('Cache-Control','public, max-age=31536000, immutable');return s.end(Buffer.from(b,'base64'))}
