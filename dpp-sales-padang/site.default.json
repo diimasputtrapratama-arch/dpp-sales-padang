@@ -1,0 +1,97 @@
+{
+ "brand": "DPP - Sales MyRepublic Padang",
+ "sales": "Nama Sales",
+ "wa": "",
+ "logo": "/assets/logo.svg",
+ "verified": false,
+ "ppn": 11,
+ "inst": 150000,
+ "denda": 25000,
+ "tempo": "Setiap tanggal 20 (ubah di Admin)",
+ "tpl": "Halo {sales}, saya {nama} ingin memesan paket {paket} (Rp {harga}/bulan).\nAlamat: {alamat}, Kec. {area}\nNo. WA: {wa}",
+ "paket": [
+  {
+   "n": "Hemat",
+   "s": "30 Mbps",
+   "h": 150000,
+   "d": "1–3 perangkat, browsing dan streaming ringan"
+  },
+  {
+   "n": "Keluarga",
+   "s": "50 Mbps",
+   "h": 220000,
+   "d": "4–6 perangkat, sekolah online dan streaming"
+  },
+  {
+   "n": "Kerja & Gaming",
+   "s": "100 Mbps",
+   "h": 320000,
+   "d": "Banyak perangkat, WFH, video call, gaming"
+  }
+ ],
+ "area": [
+  {
+   "n": "Padang Barat",
+   "c": 1
+  },
+  {
+   "n": "Padang Timur",
+   "c": 1
+  },
+  {
+   "n": "Padang Utara",
+   "c": 1
+  },
+  {
+   "n": "Padang Selatan",
+   "c": 0
+  },
+  {
+   "n": "Nanggalo",
+   "c": 1
+  },
+  {
+   "n": "Kuranji",
+   "c": 0
+  },
+  {
+   "n": "Pauh",
+   "c": 0
+  },
+  {
+   "n": "Koto Tangah",
+   "c": 0
+  },
+  {
+   "n": "Lubuk Begalung",
+   "c": 0
+  },
+  {
+   "n": "Lubuk Kilangan",
+   "c": 0
+  },
+  {
+   "n": "Bungus Teluk Kabung",
+   "c": 0
+  }
+ ],
+ "bayar": [
+  "Tagihan terbit tiap bulan dan wajib dibayar sebelum jatuh tempo.",
+  "Keterlambatan dapat dikenakan denda dan layanan bisa dibatasi sementara.",
+  "Simpan bukti pembayaran. Konfirmasi ke sales bila ada selisih tagihan."
+ ],
+ "faq": [
+  [
+   "Apakah konsultasi berbayar?",
+   "Tidak. Cek area dan konsultasi paket gratis."
+  ],
+  [
+   "Berapa lama pemasangan?",
+   "Bergantung antrean dan lokasi. Estimasi disampaikan setelah alamat dicek."
+  ],
+  [
+   "Dokumen apa yang disiapkan?",
+   "Umumnya KTP dan alamat pemasangan yang jelas, dikonfirmasi saat follow-up."
+  ]
+ ]
+}
