@@ -1,31 +1,724 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><title>Admin</title><link rel="icon" href="/assets/logo.svg"><link rel="stylesheet" href="/app.css"></head><body>
-<div id="app"></div><script src="/common.js"></script><script>
-const $=i=>document.getElementById(i);let S,ST,busy=false;
-async function api(u,m,b){const r=await fetch(u,{method:m||'GET',headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(r.status===401){loginView();throw new Error('auth')}if(!r.ok)throw new Error(j.error||('Error '+r.status));return j}
-function loginView(){$('app').innerHTML=`<div class="cd v" style="margin-top:12vh"><h1>Admin</h1><p class="mu">Masuk untuk mengelola situs.</p><label>Password</label><input id="pw" type="password" autocomplete="current-password"><div class="mu" id="lm" style="color:var(--ac);min-height:20px"></div><button class="btn bw" id="lb">Masuk</button></div>`;
- const go=async()=>{try{await api('/api/admin/login','POST',{password:$('pw').value});boot()}catch(e){if(e.message!=='auth')$('lm').textContent=e.message}};$('lb').onclick=go;$('pw').onkeydown=e=>{if(e.key==='Enter')go()}}
-async function boot(){try{S=await(await fetch('/api/site')).json();ST=await api('/api/admin/stats');draw()}catch(e){}}
-function f(l,p,t='text'){const v=p.split('.').reduce((o,k)=>o[k],S);return `<label>${l}</label><input type="${t}" value="${E(v)}" oninput="sv('${p}',this.value,'${t}')">`}
-function sv(p,v,t){const k=p.split('.'),l=k.pop(),o=k.reduce((o,x)=>o[x],S);o[l]=t==='number'?+v||0:v}
-async function up(fl,i){if(!fl)return;try{const bm=await createImageBitmap(fl),mx=i==null?256:900,k=Math.min(1,mx/Math.max(bm.width,bm.height)),cv=document.createElement('canvas');cv.width=Math.round(bm.width*k);cv.height=Math.round(bm.height*k);cv.getContext('2d').drawImage(bm,0,0,cv.width,cv.height);const r=await api('/api/admin/upload','POST',{data:cv.toDataURL(i==null?'image/png':'image/jpeg',.82)});if(i==null)S.logo=r.url;else S.paket[i].img=r.url;draw()}catch(e){alert(e.message||'Gambar tidak bisa diproses')}}
-async function save(){if(busy)return;busy=true;$('sv').textContent='Menyimpan…';try{await api('/api/admin/site','PUT',S);$('sm').textContent='Tersimpan. Perubahan langsung tampil di situs.'}catch(e){$('sm').textContent='Gagal: '+e.message}busy=false;$('sv').textContent='Simpan perubahan'}
-async function out(){try{await api('/api/admin/logout','POST')}catch(e){}loginView()}
-function draw(){const s=ST.stats||{},ph=l=>String(l.wa).replace(/\D/g,'').replace(/^0/,'62');
- $('app').innerHTML=`<div class="v"><div class="row" style="align-items:center"><h1>Dashboard</h1><div style="text-align:right"><a class="mu" href="/" target="_blank">Lihat situs</a> · <a class="mu" href="#" onclick="out();return false">Keluar</a></div></div>
- <div class="tiles" style="margin-top:12px">${[['Pesanan masuk',s.lead],['Cek area',s.area],['Buka simulasi',s.sim],['Kirim pertanyaan',s.ask]].map(x=>`<div class="tile">${x[1]||0}<div class="mu" style="color:var(--ok)">${x[0]}</div></div>`).join('')}</div>
- <h2>Pesanan terbaru</h2>${ST.leads.map(l=>`<div class="cd"><b>${E(l.nama)}</b> <span class="pill">${E(l.paket)}</span><div class="mu">${new Date(l.t).toLocaleString('id-ID')} · ${E(l.area)}</div><p style="margin:6px 0">${E(l.alamat)}</p><a class="btn b2" target="_blank" rel="noopener" href="https://wa.me/${E(ph(l))}">WA ${E(l.wa)}</a>${l.lat?` <a class="mu" target="_blank" rel="noopener" href="https://maps.google.com/?q=${E(l.lat)},${E(l.lng)}">Lihat lokasi</a>`:''}</div>`).join('')||'<p class="mu">Belum ada pesanan.</p>'}
- <h2>Pengaturan umum</h2><div class="cd">${f('Nama situs','brand')}${f('Nama sales','sales')}${f('No. WhatsApp (62…)','wa')}${f('Jatuh tempo','tempo')}
- <div class="row">${f('Biaya pasang','inst','number')}${f('PPN %','ppn','number')}${f('Denda/bulan','denda','number')}</div>
- <label>Template pesan ({sales} {nama} {paket} {harga} {alamat} {area} {wa})</label><textarea rows="4" oninput="S.tpl=this.value">${E(S.tpl)}</textarea>
- <label>Logo</label><div class="row" style="align-items:center"><img src="${E(S.logo)}" style="flex:0 0 52px;width:52px;height:52px;border-radius:14px;object-fit:cover" alt=""><input type="file" accept="image/png,image/jpeg,image/webp" style="flex:1" onchange="up(this.files[0])"><button class="btn b2" style="flex:0" onclick="S.logo='/assets/logo.svg';draw()">Reset</button></div>
- <label style="display:block;margin-top:6px"><input type="checkbox" style="width:auto" ${S.verified?'checked':''} onchange="S.verified=this.checked"> Harga sudah terverifikasi (sembunyikan banner contoh)</label></div>
- <h2>Paket</h2>${S.paket.map((p,i)=>`<div class="cd">${f('Nama',`paket.${i}.n`)}<div class="row">${f('Kecepatan',`paket.${i}.s`)}${f('Harga/bulan',`paket.${i}.h`,'number')}</div>${f('Deskripsi',`paket.${i}.d`)}
- <label>Gambar paket</label><div class="row" style="align-items:center"><div style="flex:0 0 120px;overflow:hidden;border-radius:12px">${p.img?`<img src="${E(p.img)}" style="width:100%;height:64px;object-fit:cover;display:block" alt="">`:art(p,i).replace('class="pi"','style="width:100%;height:64px;display:block"')}</div><input type="file" accept="image/png,image/jpeg,image/webp" style="flex:1" onchange="up(this.files[0],${i})">${p.img?`<button class="btn b2" style="flex:0" onclick="delete S.paket[${i}].img;draw()">Reset</button>`:''}</div>
- <button class="btn b2" onclick="S.paket.splice(${i},1);draw()">Hapus paket</button></div>`).join('')}
- <button class="btn b2 bw" onclick="S.paket.push({n:'Baru',s:'',h:0,d:''});draw()">Tambah paket</button>
- <h2>Area terjangkau</h2><div class="cd">${S.area.map((a,i)=>`<label style="display:flex;gap:8px;align-items:center;color:var(--tx);font-size:15px;margin:6px 0"><input type="checkbox" style="width:auto;margin:0" ${a.c?'checked':''} onchange="S.area[${i}].c=this.checked?1:0"> ${E(a.n)}</label>`).join('')}</div>
- <h2>Pembayaran &amp; FAQ</h2><div class="cd"><label>Info pembayaran (satu poin per baris)</label><textarea rows="4" oninput="S.bayar=this.value.split('\\n').filter(Boolean)">${E(S.bayar.join('\n'))}</textarea>
- <label>FAQ (format: Pertanyaan | Jawaban, satu per baris)</label><textarea rows="5" oninput="S.faq=this.value.split('\\n').filter(Boolean).map(l=>{const k=l.split('|');return[(k[0]||'').trim(),k.slice(1).join('|').trim()]})">${E(S.faq.map(x=>x.join(' | ')).join('\n'))}</textarea></div>
- <button class="btn bw" id="sv" onclick="save()">Simpan perubahan</button><div class="mu" id="sm" style="margin-top:8px"></div></div>`}
-boot().then(()=>{if(!ST)loginView()});
-</script></body></html>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin - DPP Sales Padang</title>
+<link rel="icon" href="/assets/logo.svg">
+<link rel="stylesheet" href="/app.css">
+</head>
+
+<body>
+
+<div id="app">
+  <div class="v">Memuat halaman admin...</div>
+</div>
+
+<script src="/common.js"></script>
+
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+
+let S = null;
+let ST = null;
+let busy = false;
+
+/* =========================
+   API REQUEST
+========================= */
+
+async function api(url, method = 'GET', data = null) {
+
+  let response;
+
+  try {
+
+    response = await fetch(url, {
+      method: method,
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: data !== null ? JSON.stringify(data) : undefined
+    });
+
+  } catch (error) {
+
+    throw new Error(
+      'Tidak dapat terhubung ke server. Periksa koneksi internet.'
+    );
+
+  }
+
+  const text = await response.text();
+
+  let result;
+
+  try {
+
+    result = text ? JSON.parse(text) : {};
+
+  } catch {
+
+    throw new Error(
+      'Server memberikan respons bukan JSON. HTTP ' +
+      response.status + '. URL: ' + url
+    );
+
+  }
+
+  if (response.status === 401) {
+    throw new Error('Sesi admin tidak ditemukan. Silakan login kembali.');
+  }
+
+  if (!response.ok) {
+
+    throw new Error(
+      (result.error || 'Permintaan gagal') +
+      ' (HTTP ' + response.status + ')'
+    );
+
+  }
+
+  return result;
+
+}
+
+/* =========================
+   LOGIN ADMIN
+========================= */
+
+function loginView(message = '') {
+
+  $('app').innerHTML = `
+    <div class="cd v" style="margin-top:12vh">
+
+      <h1>Admin</h1>
+
+      <p class="mu">
+        Masuk untuk mengelola situs.
+      </p>
+
+      <label>Password</label>
+
+      <input
+        id="pw"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Masukkan password admin"
+      >
+
+      <div
+        id="lm"
+        class="mu"
+        style="color:var(--ac);min-height:24px;margin-top:10px"
+      >${E(message)}</div>
+
+      <button
+        class="btn bw"
+        id="lb"
+        type="button"
+      >
+        Masuk
+      </button>
+
+    </div>
+  `;
+
+  const go = async () => {
+
+    const password = $('pw').value;
+
+    if (!password) {
+      $('lm').textContent = 'Password harus diisi.';
+      return;
+    }
+
+    const button = $('lb');
+
+    button.disabled = true;
+    button.textContent = 'Memeriksa...';
+
+    $('lm').textContent = '';
+
+    try {
+
+      await api(
+        '/api/admin/login',
+        'POST',
+        { password: password }
+      );
+
+      await boot();
+
+    } catch (error) {
+
+      $('lm').textContent = error.message;
+
+      button.disabled = false;
+      button.textContent = 'Masuk';
+
+    }
+
+  };
+
+  $('lb').onclick = go;
+
+  $('pw').onkeydown = event => {
+
+    if (event.key === 'Enter') {
+      go();
+    }
+
+  };
+
+}
+
+/* =========================
+   LOAD DASHBOARD
+========================= */
+
+async function boot() {
+
+  try {
+
+    const site = await api('/api/site');
+
+    if (site.error) {
+      throw new Error(site.error);
+    }
+
+    S = site;
+
+    ST = await api('/api/admin/stats');
+
+    if (!ST.stats) {
+      ST.stats = {};
+    }
+
+    if (!Array.isArray(ST.leads)) {
+      ST.leads = [];
+    }
+
+    draw();
+
+  } catch (error) {
+
+    S = null;
+    ST = null;
+
+    loginView(error.message);
+
+  }
+
+}
+
+/* =========================
+   FORM INPUT
+========================= */
+
+function f(label, path, type = 'text') {
+
+  const value = path.split('.').reduce(
+    (obj, key) => obj[key],
+    S
+  );
+
+  return `
+    <label>${E(label)}</label>
+
+    <input
+      type="${type}"
+      value="${E(value)}"
+      oninput="sv('${path}',this.value,'${type}')"
+    >
+  `;
+
+}
+
+function sv(path, value, type) {
+
+  const keys = path.split('.');
+  const last = keys.pop();
+
+  const object = keys.reduce(
+    (obj, key) => obj[key],
+    S
+  );
+
+  object[last] = type === 'number'
+    ? (+value || 0)
+    : value;
+
+}
+
+/* =========================
+   UPLOAD GAMBAR
+========================= */
+
+async function up(file, index) {
+
+  if (!file) return;
+
+  try {
+
+    if (!file.type.startsWith('image/')) {
+      throw new Error('File harus berupa gambar.');
+    }
+
+    const bitmap = await createImageBitmap(file);
+
+    const max = index == null ? 256 : 900;
+
+    const scale = Math.min(
+      1,
+      max / Math.max(bitmap.width, bitmap.height)
+    );
+
+    const canvas = document.createElement('canvas');
+
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+
+    canvas.getContext('2d').drawImage(
+      bitmap,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    const data = canvas.toDataURL(
+      index == null ? 'image/png' : 'image/jpeg',
+      0.82
+    );
+
+    const result = await api(
+      '/api/admin/upload',
+      'POST',
+      { data: data }
+    );
+
+    if (index == null) {
+      S.logo = result.url;
+    } else {
+      S.paket[index].img = result.url;
+    }
+
+    draw();
+
+  } catch (error) {
+
+    alert('Upload gagal: ' + error.message);
+
+  }
+
+}
+
+/* =========================
+   SIMPAN PENGATURAN
+========================= */
+
+async function save() {
+
+  if (busy) return;
+
+  busy = true;
+
+  $('sv').textContent = 'Menyimpan...';
+
+  try {
+
+    await api(
+      '/api/admin/site',
+      'PUT',
+      S
+    );
+
+    $('sm').textContent =
+      'Berhasil disimpan. Perubahan sudah tersimpan.';
+
+  } catch (error) {
+
+    $('sm').textContent =
+      'Gagal menyimpan: ' + error.message;
+
+  }
+
+  busy = false;
+
+  $('sv').textContent = 'Simpan perubahan';
+
+}
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function out() {
+
+  try {
+
+    await api(
+      '/api/admin/logout',
+      'POST'
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+
+  loginView('Kamu sudah keluar dari dashboard.');
+
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+function draw() {
+
+  const stats = ST.stats || {};
+
+  const phone = value =>
+    String(value || '')
+      .replace(/\D/g, '')
+      .replace(/^0/, '62');
+
+  $('app').innerHTML = `
+
+    <div class="v">
+
+      <div class="row" style="align-items:center">
+
+        <h1>Dashboard</h1>
+
+        <div style="text-align:right">
+
+          <a class="mu" href="/" target="_blank">
+            Lihat situs
+          </a>
+
+          ·
+
+          <a
+            class="mu"
+            href="#"
+            onclick="out();return false"
+          >
+            Keluar
+          </a>
+
+        </div>
+
+      </div>
+
+      <div class="tiles" style="margin-top:12px">
+
+        ${[
+          ['Pesanan masuk', stats.lead],
+          ['Cek area', stats.area],
+          ['Buka simulasi', stats.sim],
+          ['Kirim pertanyaan', stats.ask]
+        ].map(item => `
+
+          <div class="tile">
+
+            ${item[1] || 0}
+
+            <div class="mu" style="color:var(--ok)">
+              ${E(item[0])}
+            </div>
+
+          </div>
+
+        `).join('')}
+
+      </div>
+
+      <h2>Pesanan terbaru</h2>
+
+      ${ST.leads.map(lead => `
+
+        <div class="cd">
+
+          <b>${E(lead.nama)}</b>
+
+          <span class="pill">
+            ${E(lead.paket)}
+          </span>
+
+          <div class="mu">
+
+            ${new Date(lead.t).toLocaleString('id-ID')}
+
+            ·
+
+            ${E(lead.area)}
+
+          </div>
+
+          <p style="margin:6px 0">
+            ${E(lead.alamat)}
+          </p>
+
+          <a
+            class="btn b2"
+            target="_blank"
+            rel="noopener"
+            href="https://wa.me/${E(phone(lead.wa))}"
+          >
+            WA ${E(lead.wa)}
+          </a>
+
+          ${lead.lat ? `
+
+            <a
+              class="mu"
+              target="_blank"
+              rel="noopener"
+              href="https://maps.google.com/?q=${E(lead.lat)},${E(lead.lng)}"
+            >
+              Lihat lokasi
+            </a>
+
+          ` : ''}
+
+        </div>
+
+      `).join('') || '<p class="mu">Belum ada pesanan.</p>'}
+
+      <h2>Pengaturan umum</h2>
+
+      <div class="cd">
+
+        ${f('Nama situs', 'brand')}
+
+        ${f('Nama sales', 'sales')}
+
+        ${f('No. WhatsApp (62...)', 'wa')}
+
+        ${f('Jatuh tempo', 'tempo')}
+
+        <div class="row">
+
+          ${f('Biaya pasang', 'inst', 'number')}
+
+          ${f('PPN %', 'ppn', 'number')}
+
+          ${f('Denda/bulan', 'denda', 'number')}
+
+        </div>
+
+        <label>Template pesan</label>
+
+        <textarea
+          rows="4"
+          oninput="S.tpl=this.value"
+        >${E(S.tpl)}</textarea>
+
+        <label>Logo</label>
+
+        <div class="row" style="align-items:center">
+
+          <img
+            src="${E(S.logo)}"
+            style="flex:0 0 52px;width:52px;height:52px;border-radius:14px;object-fit:cover"
+            alt=""
+          >
+
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            style="flex:1"
+            onchange="up(this.files[0])"
+          >
+
+          <button
+            class="btn b2"
+            style="flex:0"
+            onclick="S.logo='/assets/logo.svg';draw()"
+          >
+            Reset
+          </button>
+
+        </div>
+
+        <label style="display:block;margin-top:6px">
+
+          <input
+            type="checkbox"
+            style="width:auto"
+            ${S.verified ? 'checked' : ''}
+            onchange="S.verified=this.checked"
+          >
+
+          Harga sudah terverifikasi
+
+        </label>
+
+      </div>
+
+      <h2>Paket</h2>
+
+      ${S.paket.map((paket, index) => `
+
+        <div class="cd">
+
+          ${f('Nama', `paket.${index}.n`)}
+
+          <div class="row">
+
+            ${f('Kecepatan', `paket.${index}.s`)}
+
+            ${f('Harga/bulan', `paket.${index}.h`, 'number')}
+
+          </div>
+
+          ${f('Deskripsi', `paket.${index}.d`)}
+
+          <label>Gambar paket</label>
+
+          <div class="row" style="align-items:center">
+
+            <div style="flex:0 0 120px">
+
+              ${paket.img ? `
+
+                <img
+                  src="${E(paket.img)}"
+                  style="width:100%;height:64px;object-fit:cover;border-radius:12px"
+                  alt=""
+                >
+
+              ` : 'Belum ada gambar'}
+
+            </div>
+
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              style="flex:1"
+              onchange="up(this.files[0],${index})"
+            >
+
+            ${paket.img ? `
+
+              <button
+                class="btn b2"
+                style="flex:0"
+                onclick="delete S.paket[${index}].img;draw()"
+              >
+                Reset
+              </button>
+
+            ` : ''}
+
+          </div>
+
+          <button
+            class="btn b2"
+            onclick="S.paket.splice(${index},1);draw()"
+          >
+            Hapus paket
+          </button>
+
+        </div>
+
+      `).join('')}
+
+      <button
+        class="btn b2 bw"
+        onclick="S.paket.push({n:'Baru',s:'',h:0,d:''});draw()"
+      >
+        Tambah paket
+      </button>
+
+      <h2>Area terjangkau</h2>
+
+      <div class="cd">
+
+        ${S.area.map((area, index) => `
+
+          <label style="display:flex;gap:8px;align-items:center;color:var(--tx);font-size:15px;margin:6px 0">
+
+            <input
+              type="checkbox"
+              style="width:auto;margin:0"
+              ${area.c ? 'checked' : ''}
+              onchange="S.area[${index}].c=this.checked?1:0"
+            >
+
+            ${E(area.n)}
+
+          </label>
+
+        `).join('')}
+
+      </div>
+
+      <h2>Pembayaran & FAQ</h2>
+
+      <div class="cd">
+
+        <label>Info pembayaran (satu poin per baris)</label>
+
+        <textarea
+          rows="4"
+          oninput="S.bayar=this.value.split('\\n').filter(Boolean)"
+        >${E(S.bayar.join('\n'))}</textarea>
+
+        <label>FAQ (Pertanyaan | Jawaban)</label>
+
+        <textarea
+          rows="5"
+          oninput="
+            S.faq=this.value.split('\\n').filter(Boolean).map(line=>{
+              const k=line.split('|');
+              return [
+                (k[0]||'').trim(),
+                k.slice(1).join('|').trim()
+              ];
+            })
+          "
+        >${E(S.faq.map(x=>x.join(' | ')).join('\n'))}</textarea>
+
+      </div>
+
+      <button
+        class="btn bw"
+        id="sv"
+        onclick="save()"
+      >
+        Simpan perubahan
+      </button>
+
+      <div
+        class="mu"
+        id="sm"
+        style="margin-top:8px"
+      ></div>
+
+    </div>
+
+  `;
+
+}
+
+/* =========================
+   START APPLICATION
+========================= */
+
+boot();
+
+</script>
+
+</body>
+</html>
