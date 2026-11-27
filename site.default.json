@@ -19,7 +19,9 @@
     "m1": 20000,
     "m2": 20000,
     "m3": 50000
-   }
+   },
+   "ln": "Reguler",
+   "inc": false
   },
   {
    "n": "Keluarga",
@@ -30,7 +32,9 @@
     "m1": 20000,
     "m2": 20000,
     "m3": 50000
-   }
+   },
+   "ln": "Reguler",
+   "inc": false
   },
   {
    "n": "Kerja & Gaming",
@@ -41,53 +45,132 @@
     "m1": 20000,
     "m2": 20000,
     "m3": 50000
-   }
+   },
+   "ln": "Reguler",
+   "inc": false
   }
  ],
  "area": [
   {
    "n": "Padang Barat",
-   "c": 1
+   "c": 1,
+   "lvl": "kec",
+   "kec": "",
+   "kab": "Kota Padang",
+   "prov": "Sumatera Barat",
+   "lat": "",
+   "lng": "",
+   "r": 0
   },
   {
    "n": "Padang Timur",
-   "c": 1
+   "c": 1,
+   "lvl": "kec",
+   "kec": "",
+   "kab": "Kota Padang",
+   "prov": "Sumatera Barat",
+   "lat": "",
+   "lng": "",
+   "r": 0
   },
   {
    "n": "Padang Utara",
-   "c": 1
+   "c": 1,
+   "lvl": "kec",
+   "kec": "",
+   "kab": "Kota Padang",
+   "prov": "Sumatera Barat",
+   "lat": "",
+   "lng": "",
+   "r": 0
   },
   {
    "n": "Padang Selatan",
-   "c": 0
+   "c": 0,
+   "lvl": "kec",
+   "kec": "",
+   "kab": "Kota Padang",
+   "prov": "Sumatera Barat",
+   "lat": "",
+   "lng": "",
+   "r": 0
   },
   {
    "n": "Nanggalo",
-   "c": 1
+   "c": 1,
+   "lvl": "kec",
+   "kec": "",
+   "kab": "Kota Padang",
+   "prov": "Sumatera Barat",
+   "lat": "",
+   "lng": "",
+   "r": 0
   },
   {
    "n": "Kuranji",
-   "c": 0
+   "c": 0,
+   "lvl": "kec",
+   "kec": "",
+   "kab": "Kota Padang",
+   "prov": "Sumatera Barat",
+   "lat": "",
+   "lng": "",
+   "r": 0
   },
   {
    "n": "Pauh",
-   "c": 0
+   "c": 0,
+   "lvl": "kec",
+   "kec": "",
+   "kab": "Kota Padang",
+   "prov": "Sumatera Barat",
+   "lat": "",
+   "lng": "",
+   "r": 0
   },
   {
    "n": "Koto Tangah",
-   "c": 0
+   "c": 0,
+   "lvl": "kec",
+   "kec": "",
+   "kab": "Kota Padang",
+   "prov": "Sumatera Barat",
+   "lat": "",
+   "lng": "",
+   "r": 0
   },
   {
    "n": "Lubuk Begalung",
-   "c": 0
+   "c": 0,
+   "lvl": "kec",
+   "kec": "",
+   "kab": "Kota Padang",
+   "prov": "Sumatera Barat",
+   "lat": "",
+   "lng": "",
+   "r": 0
   },
   {
    "n": "Lubuk Kilangan",
-   "c": 0
+   "c": 0,
+   "lvl": "kec",
+   "kec": "",
+   "kab": "Kota Padang",
+   "prov": "Sumatera Barat",
+   "lat": "",
+   "lng": "",
+   "r": 0
   },
   {
    "n": "Bungus Teluk Kabung",
-   "c": 0
+   "c": 0,
+   "lvl": "kec",
+   "kec": "",
+   "kab": "Kota Padang",
+   "prov": "Sumatera Barat",
+   "lat": "",
+   "lng": "",
+   "r": 0
   }
  ],
  "bayar": [
@@ -127,5 +210,10 @@
   "needInstalled": false,
   "confirm": "Terima kasih! Pendaftaran kerabatmu sudah kami terima. Insentif dicairkan bertahap setelah syarat terpenuhi.",
   "terms": []
- }
+ },
+ "prov": "Sumatera Barat",
+ "kab": "Kota Padang",
+ "lines": [
+  "Reguler"
+ ]
 }

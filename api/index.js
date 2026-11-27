@@ -22,8 +22,9 @@ const str=(v,n=300)=>String(v??'').slice(0,n),num=v=>Math.max(0,Math.min(1e9,+v|
 function clean(b){if(!b||!Array.isArray(b.paket)||!Array.isArray(b.area))throw new Error('Data tidak valid');
  return{brand:str(b.brand,80),sales:str(b.sales,60),wa:str(b.wa,20).replace(/\D/g,''),logo:sU(b.logo)||'/assets/logo.svg',verified:!!b.verified,ppn:num(b.ppn),inst:num(b.inst),denda:num(b.denda),tempo:str(b.tempo,100),tpl:str(b.tpl,800),ref:{on:!(b.ref&&b.ref.on===false),months:Math.max(1,Math.min(24,+(b.ref&&b.ref.months)||3)),terms:((b.ref&&Array.isArray(b.ref.terms))?b.ref.terms:[]).slice(0,10).map(x=>str(x,200)).filter(Boolean),needInstalled:!!(b.ref&&b.ref.needInstalled),confirm:str(b.ref&&b.ref.confirm,400)||DEFCONF},footer:str(b.footer,300),links:Object.fromEntries(['web','app','ig','tt','x'].map(k=>[k,/^https:\/\/\S{3,190}$/.test(str(b.links&&b.links[k],200))?str(b.links[k],200):''])),galeri:(Array.isArray(b.galeri)?b.galeri:[]).slice(0,12).map(sU).filter(Boolean),
  adm:num(b.adm),footerUrl:/^https:\/\/\S{3,190}$/.test(str(b.footerUrl,200))?str(b.footerUrl,200):'',biaya:(Array.isArray(b.biaya)?b.biaya:[]).slice(0,20).map(x=>[str(x[0],60),str(x[1],60),str(x[2],200)]).filter(x=>x[0]),
- paket:b.paket.slice(0,12).map(x=>({n:str(x.n,40),s:str(x.s,30),h:num(x.h),d:str(x.d,200),rw:{m1:num((x.rw||{m1:20000}).m1),m2:num((x.rw||{m2:20000}).m2),m3:num((x.rw||{m3:50000}).m3)},...(sU(x.img)?{img:x.img}:{})})),
- area:b.area.slice(0,60).map(x=>({n:str(x.n,60),c:x.c?1:0})),
+ paket:b.paket.slice(0,12).map(x=>({n:str(x.n,40),s:str(x.s,30),h:num(x.h),inc:!!x.inc,ln:str(x.ln,30),d:str(x.d,200),rw:{m1:num((x.rw||{m1:20000}).m1),m2:num((x.rw||{m2:20000}).m2),m3:num((x.rw||{m3:50000}).m3)},...(sU(x.img)?{img:x.img}:{})})),
+ prov:str(b.prov,60),kab:str(b.kab,60),lines:(Array.isArray(b.lines)?b.lines:[]).slice(0,10).map(x=>str(x,30)).filter(Boolean),
+ area:b.area.slice(0,300).map(x=>{const la=parseFloat(x.lat),ln=parseFloat(x.lng),ok=Math.abs(la)<=90&&Math.abs(ln)<=180;return{n:str(x.n,90),c:x.c?1:0,lvl:x.lvl==='desa'?'desa':'kec',kec:str(x.kec,60),kab:str(x.kab,60),prov:str(x.prov,60),lat:ok?+la.toFixed(5):'',lng:ok?+ln.toFixed(5):'',r:Math.min(50000,num(x.r))}}),
  bayar:(Array.isArray(b.bayar)?b.bayar:[]).slice(0,12).map(x=>str(x,300)),
  faq:(Array.isArray(b.faq)?b.faq:[]).slice(0,20).map(x=>[str(x[0],200),str(x[1],500)])}}
 module.exports=async(q,s)=>{
