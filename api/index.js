@@ -12,7 +12,7 @@ const cookie=q=>Object.fromEntries((q.headers.cookie||'').split(';').map(x=>x.tr
 const sU=u=>typeof u==='string'&&/^\/(uploads|assets)\/[\w.-]+$/.test(u)?u:'';
 const str=(v,n=300)=>String(v??'').slice(0,n),num=v=>Math.max(0,Math.min(1e9,+v||0));
 function clean(b){if(!b||!Array.isArray(b.paket)||!Array.isArray(b.area))throw new Error('Data tidak valid');
- return{brand:str(b.brand,80),sales:str(b.sales,60),wa:str(b.wa,20).replace(/\D/g,''),logo:sU(b.logo)||'/assets/logo.svg',verified:!!b.verified,ppn:num(b.ppn),inst:num(b.inst),denda:num(b.denda),tempo:str(b.tempo,100),tpl:str(b.tpl,800),links:Object.fromEntries(['web','app','ig','tt','x'].map(k=>[k,/^https:\/\/\S{3,190}$/.test(str(b.links&&b.links[k],200))?str(b.links[k],200):''])),galeri:(Array.isArray(b.galeri)?b.galeri:[]).slice(0,12).map(sU).filter(Boolean),
+ return{brand:str(b.brand,80),sales:str(b.sales,60),wa:str(b.wa,20).replace(/\D/g,''),logo:sU(b.logo)||'/assets/logo.svg',verified:!!b.verified,ppn:num(b.ppn),inst:num(b.inst),denda:num(b.denda),tempo:str(b.tempo,100),tpl:str(b.tpl,800),footer:str(b.footer,300),links:Object.fromEntries(['web','app','ig','tt','x'].map(k=>[k,/^https:\/\/\S{3,190}$/.test(str(b.links&&b.links[k],200))?str(b.links[k],200):''])),galeri:(Array.isArray(b.galeri)?b.galeri:[]).slice(0,12).map(sU).filter(Boolean),
  paket:b.paket.slice(0,12).map(x=>({n:str(x.n,40),s:str(x.s,30),h:num(x.h),d:str(x.d,200),...(sU(x.img)?{img:x.img}:{})})),
  area:b.area.slice(0,60).map(x=>({n:str(x.n,60),c:x.c?1:0})),
  bayar:(Array.isArray(b.bayar)?b.bayar:[]).slice(0,12).map(x=>str(x,300)),
@@ -42,7 +42,7 @@ module.exports=async(q,s)=>{
    if(!L||String(L.wa).replace(/\D/g,'').slice(-4)!==tel.slice(-4))return J(404,{error:'Pesanan tidak ditemukan atau 4 digit nomor tidak cocok'});
    return J(200,{status:L.status,paket:L.paket,area:L.area,t:L.t})}
   if(path==='/api/reviews'&&m==='GET'){const cs=(await r('LRANGE','reviews',0,49))||[];
-   return J(200,cs.length?(await r('MGET',...cs.map(x=>'review:'+x))).filter(Boolean).map(x=>JSON.parse(x)).filter(x=>!x.hidden).map(x=>({n:x.n,a:x.a,r:x.r,t:x.t,d:x.d})):[])}
+   return J(200,cs.length?(await r('MGET',...cs.map(x=>'review:'+x))).filter(Boolean).map(x=>JSON.parse(x)).filter(x=>!x.hidden).map(x=>({n:x.n,c:'DPP-••'+String(x.code).slice(-4),a:x.a,r:x.r,t:x.t,d:x.d})):[])}
   if(path==='/api/review'&&m==='POST'){
    if(await rl('rl:r:'+ip,5,3600))return J(429,{error:'Terlalu banyak permintaan'});
    const cd=str(b.code,12).toUpperCase(),nw=x=>{x=String(x||'').replace(/\D/g,'');return x.startsWith('0')?'62'+x.slice(1):x};
