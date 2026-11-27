@@ -68,3 +68,4 @@ nav button{font-size:10.5px}
 .ft{text-align:center;margin-top:30px;padding-top:18px;border-top:1px solid var(--br)}.ft1{font:600 13.5px Georgia,serif}.ft .mu{margin-top:2px}
 .pv{display:inline-flex;align-items:center;gap:8px;background:none;border:1px solid var(--br);color:var(--tx);border-radius:30px;padding:9px 16px;margin-bottom:14px;font:600 13px inherit;font-family:inherit;cursor:pointer}.pv svg{width:18px;height:18px;fill:none;stroke:var(--ac);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .pk:active{transform:perspective(600px) rotateX(2.5deg) scale(.985)}
+.cmp.bk td:last-child{text-align:right}.cmp.bk{width:100%;margin-top:8px}

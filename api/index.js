@@ -11,7 +11,7 @@ const same=(a,b)=>c.timingSafeEqual(c.createHash('sha256').update(a).digest(),c.
 const cookie=q=>Object.fromEntries((q.headers.cookie||'').split(';').map(x=>x.trim().split('=')).filter(x=>x[0]&&x[1]));
 const DEFCONF="Terima kasih! Pendaftaran kerabatmu sudah kami terima. Insentif dicairkan setelah WiFi kerabatmu berstatus aktif dan pembayaran pertama lunas.";
 const nwp=x=>{x=String(x||'').replace(/\D/g,'');return x.startsWith('0')?'62'+x.slice(1):x},okWa=x=>/^(08\d{8,12}|62\d{9,13})$/.test(String(x||'').replace(/\D/g,''));
-const RFD=s=>Object.assign({on:true,reward:50000,needInstalled:false,confirm:DEFCONF},s);
+const RFD=s=>Object.assign({on:true,months:3,needInstalled:false,confirm:DEFCONF},s);
 const getRf=async()=>{const v=await r('GET','site');return RFD(v?JSON.parse(v).ref:null)};
 const findLead=async n=>{const cs=(await r('LRANGE','leads',0,499))||[];if(!cs.length)return null;return(await r('MGET',...cs.map(x=>'lead:'+x))).filter(Boolean).map(x=>JSON.parse(x)).find(x=>nwp(x.wa)===n&&x.status!=='Batal')||null};
 const mkr=n=>{const e=String(Date.now()+6048e5);return n+'.'+e+'.'+sign('r'+n+'.'+e)};
@@ -20,8 +20,9 @@ const RCK=n=>'rid='+mkr(n)+'; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age
 const sU=u=>typeof u==='string'&&/^\/(uploads|assets)\/[\w.-]+$/.test(u)?u:'';
 const str=(v,n=300)=>String(v??'').slice(0,n),num=v=>Math.max(0,Math.min(1e9,+v||0));
 function clean(b){if(!b||!Array.isArray(b.paket)||!Array.isArray(b.area))throw new Error('Data tidak valid');
- return{brand:str(b.brand,80),sales:str(b.sales,60),wa:str(b.wa,20).replace(/\D/g,''),logo:sU(b.logo)||'/assets/logo.svg',verified:!!b.verified,ppn:num(b.ppn),inst:num(b.inst),denda:num(b.denda),tempo:str(b.tempo,100),tpl:str(b.tpl,800),ref:{on:!(b.ref&&b.ref.on===false),reward:num(b.ref&&b.ref.reward!=null?b.ref.reward:50000),needInstalled:!!(b.ref&&b.ref.needInstalled),confirm:str(b.ref&&b.ref.confirm,400)||DEFCONF},footer:str(b.footer,300),links:Object.fromEntries(['web','app','ig','tt','x'].map(k=>[k,/^https:\/\/\S{3,190}$/.test(str(b.links&&b.links[k],200))?str(b.links[k],200):''])),galeri:(Array.isArray(b.galeri)?b.galeri:[]).slice(0,12).map(sU).filter(Boolean),
- paket:b.paket.slice(0,12).map(x=>({n:str(x.n,40),s:str(x.s,30),h:num(x.h),d:str(x.d,200),...(sU(x.img)?{img:x.img}:{})})),
+ return{brand:str(b.brand,80),sales:str(b.sales,60),wa:str(b.wa,20).replace(/\D/g,''),logo:sU(b.logo)||'/assets/logo.svg',verified:!!b.verified,ppn:num(b.ppn),inst:num(b.inst),denda:num(b.denda),tempo:str(b.tempo,100),tpl:str(b.tpl,800),ref:{on:!(b.ref&&b.ref.on===false),months:Math.max(1,Math.min(24,+(b.ref&&b.ref.months)||3)),terms:((b.ref&&Array.isArray(b.ref.terms))?b.ref.terms:[]).slice(0,10).map(x=>str(x,200)).filter(Boolean),needInstalled:!!(b.ref&&b.ref.needInstalled),confirm:str(b.ref&&b.ref.confirm,400)||DEFCONF},footer:str(b.footer,300),links:Object.fromEntries(['web','app','ig','tt','x'].map(k=>[k,/^https:\/\/\S{3,190}$/.test(str(b.links&&b.links[k],200))?str(b.links[k],200):''])),galeri:(Array.isArray(b.galeri)?b.galeri:[]).slice(0,12).map(sU).filter(Boolean),
+ adm:num(b.adm),footerUrl:/^https:\/\/\S{3,190}$/.test(str(b.footerUrl,200))?str(b.footerUrl,200):'',biaya:(Array.isArray(b.biaya)?b.biaya:[]).slice(0,20).map(x=>[str(x[0],60),str(x[1],60),str(x[2],200)]).filter(x=>x[0]),
+ paket:b.paket.slice(0,12).map(x=>({n:str(x.n,40),s:str(x.s,30),h:num(x.h),d:str(x.d,200),rw:{m1:num((x.rw||{m1:20000}).m1),m2:num((x.rw||{m2:20000}).m2),m3:num((x.rw||{m3:50000}).m3)},...(sU(x.img)?{img:x.img}:{})})),
  area:b.area.slice(0,60).map(x=>({n:str(x.n,60),c:x.c?1:0})),
  bayar:(Array.isArray(b.bayar)?b.bayar:[]).slice(0,12).map(x=>str(x,300)),
  faq:(Array.isArray(b.faq)?b.faq:[]).slice(0,20).map(x=>[str(x[0],200),str(x[1],500)])}}
@@ -89,7 +90,7 @@ module.exports=async(q,s)=>{
     return J(200,{ok:1},{'Set-Cookie':RCK(n)})}
    const n=vr(cookie(q).rid);if(!n)return J(401,{error:'Belum masuk'});
    if(path==='/api/ref/me'&&m==='GET'){const U=JSON.parse((await r('GET','refuser:'+n))||'{}'),ids=(await r('LRANGE','refsby:'+n,0,99))||[];
-    return J(200,{name:U.name,list:ids.length?(await r('MGET',...ids.map(i=>'ref:'+i))).filter(Boolean).map(x=>JSON.parse(x)).map(x=>({referee_name:x.referee_name,referee_phone:x.referee_phone,status:x.status,reward_amount:x.reward_amount,created_at:x.created_at})):[]})}
+    return J(200,{name:U.name,list:ids.length?(await r('MGET',...ids.map(i=>'ref:'+i))).filter(Boolean).map(x=>JSON.parse(x)).map(x=>({id:x.id,referee_name:x.referee_name,referee_phone:x.referee_phone,paket:x.paket,status:x.status,first_paid:x.first_paid,months_ok:x.months_ok,ms:x.ms||[],reward_amount:x.reward_amount,ew:'••••'+String(x.referrer_ewallet||'').slice(-4),created_at:x.created_at,updated_at:x.updated_at})):[]})}
    if(path==='/api/ref/create'&&m==='POST'){
     if(await rl('rl:rc:'+n,10,3600))return J(429,{error:'Terlalu banyak pendaftaran. Coba lagi nanti.'});
     const rn=str(b.referee_name,80).trim(),ad=str(b.installation_address,400).trim(),ew=str(b.referrer_ewallet,100).trim();
@@ -97,9 +98,11 @@ module.exports=async(q,s)=>{
     if(!okWa(b.referee_phone))return J(400,{error:'Nomor WhatsApp harus diawali 08 atau 62'});
     const p=nwp(b.referee_phone);if(p===n)return J(400,{error:'Tidak bisa mendaftarkan nomor sendiri'});
     if(await findLead(p))return J(409,{error:'Nomor ini sudah terdaftar sebagai pemesan'});
+    const site=JSON.parse((await r('GET','site'))||'null')||DEF,pk=(site.paket||[]).find(x=>x.n===str(b.paket,40));if(!pk)return J(400,{error:'Pilih paket layanan'});
+    const w=Object.assign({m1:20000,m2:20000,m3:50000},pk.rw),ms=[['m1','Terdaftar dan terpasang'],['m2','Pembayaran pertama sukses'],['m3','Berlangganan '+cf.months+' bulan sukses']].map(x=>({k:x[0],label:x[1],amt:num(w[x[0]]),paid:false,at:0}));
     const id=await r('INCR','refid'),now=Date.now(),U=JSON.parse((await r('GET','refuser:'+n))||'{}');
     if(await r('SET','refphone:'+p,String(id),'NX')!=='OK')return J(409,{error:'Nomor calon pelanggan ini sudah didaftarkan'});
-    await r('SET','ref:'+id,JSON.stringify({id,referrer_name:U.name||'',referrer_phone:n,referrer_ewallet:ew,referee_name:rn,referee_phone:p,installation_address:ad,lat:str(b.lat,12),lng:str(b.lng,12),status:'PENDING_ODP',first_paid:false,reward_amount:cf.reward,note:'',created_at:now,updated_at:now}));
+    await r('SET','ref:'+id,JSON.stringify({id,referrer_name:U.name||'',referrer_phone:n,referrer_ewallet:ew,referee_name:rn,referee_phone:p,installation_address:ad,lat:str(b.lat,12),lng:str(b.lng,12),paket:pk.n,ms,status:'PENDING_ODP',first_paid:false,months_ok:false,reward_amount:ms.reduce((s,m)=>s+m.amt,0),note:'',created_at:now,updated_at:now}));
     await r('LPUSH','refs',id);await r('LTRIM','refs',0,999);await r('LPUSH','refsby:'+n,id);return J(200,{ok:1,id,message:cf.confirm})}
    return J(404,{error:'Tidak ditemukan'})}
   if(path.startsWith('/api/admin/')){
@@ -110,10 +113,12 @@ module.exports=async(q,s)=>{
    if(path==='/api/admin/review'&&m==='PUT'){const k='review:'+str(b.code,12),v=await r('GET',k);if(!v)return J(400,{error:'Data tidak valid'});const x=JSON.parse(v);x.hidden=!!b.hidden;await r('SET',k,JSON.stringify(x));return J(200,{ok:1})}
    if(path==='/api/admin/refs'&&m==='GET'){const ids=(await r('LRANGE','refs',0,199))||[];return J(200,{refs:ids.length?(await r('MGET',...ids.map(i=>'ref:'+i))).filter(Boolean).map(x=>JSON.parse(x)):[]})}
    if(path==='/api/admin/ref'&&m==='PUT'){const k='ref:'+(+b.id||0),v=await r('GET',k);if(!v)return J(400,{error:'Data tidak valid'});const x=JSON.parse(v);
-    if(b.reward_amount!=null)x.reward_amount=num(b.reward_amount);if(b.note!=null)x.note=str(b.note,300);if(b.first_paid!=null)x.first_paid=!!b.first_paid;
+    if(b.months_ok!=null)x.months_ok=!!b.months_ok;if(b.note!=null)x.note=str(b.note,300);if(b.first_paid!=null)x.first_paid=!!b.first_paid;
+    if(b.paid&&x.ms){const st=b.status||x.status,ins=['INSTALLED_ACTIVE','PAID_REWARD'].includes(st),el={m1:ins,m2:ins&&x.first_paid,m3:ins&&x.months_ok};
+     for(const m of x.ms){if(b.paid[m.k]==null)continue;const v=!!b.paid[m.k];if(v&&!m.paid){if(!el[m.k])return J(400,{error:'Syarat "'+m.label+'" belum terpenuhi'});m.paid=true;m.at=Date.now()}else if(!v){m.paid=false;m.at=0}}}
     if(b.status&&b.status!==x.status){const T={PENDING_ODP:['SURVEY','INSTALLED_ACTIVE','REJECTED'],SURVEY:['PENDING_ODP','INSTALLED_ACTIVE','REJECTED'],INSTALLED_ACTIVE:['SURVEY','PAID_REWARD','REJECTED'],PAID_REWARD:[],REJECTED:['PENDING_ODP']};
      if(!(T[x.status]||[]).includes(b.status))return J(400,{error:'Perubahan status dari '+x.status+' ke '+b.status+' tidak diizinkan'});
-     if(b.status==='PAID_REWARD'&&!x.first_paid)return J(400,{error:'Tandai "pembayaran pertama lunas" dulu'});x.status=b.status}
+     if(b.status==='PAID_REWARD'&&!(x.ms||[]).every(m=>m.paid))return J(400,{error:'Semua reward harus berstatus ditransfer dulu'});x.status=b.status}
     x.updated_at=Date.now();await r('SET',k,JSON.stringify(x));return J(200,{ok:1,ref:x})}
    if(path==='/api/admin/site'&&m==='PUT'){await r('SET','site',JSON.stringify(clean(b)));return J(200,{ok:1})}
    if(path==='/api/admin/upload'&&m==='POST'){

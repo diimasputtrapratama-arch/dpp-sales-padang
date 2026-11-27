@@ -14,19 +14,34 @@
    "n": "Hemat",
    "s": "30 Mbps",
    "h": 150000,
-   "d": "1–3 perangkat, browsing dan streaming ringan"
+   "d": "1–3 perangkat, browsing dan streaming ringan",
+   "rw": {
+    "m1": 20000,
+    "m2": 20000,
+    "m3": 50000
+   }
   },
   {
    "n": "Keluarga",
    "s": "50 Mbps",
    "h": 220000,
-   "d": "4–6 perangkat, sekolah online dan streaming"
+   "d": "4–6 perangkat, sekolah online dan streaming",
+   "rw": {
+    "m1": 20000,
+    "m2": 20000,
+    "m3": 50000
+   }
   },
   {
    "n": "Kerja & Gaming",
    "s": "100 Mbps",
    "h": 320000,
-   "d": "Banyak perangkat, WFH, video call, gaming"
+   "d": "Banyak perangkat, WFH, video call, gaming",
+   "rw": {
+    "m1": 20000,
+    "m2": 20000,
+    "m3": 50000
+   }
   }
  ],
  "area": [
@@ -102,5 +117,15 @@
   "x": ""
  },
  "galeri": [],
- "footer": "© 2026 DPP - Sales Padang\nMyRepublic Account Executive · @dimasputrapratama.id"
+ "footer": "© 2026 DPP - Sales Padang\nMyRepublic Account Executive · @dimasputrapratama.id",
+ "adm": 0,
+ "footerUrl": "",
+ "biaya": [],
+ "ref": {
+  "on": true,
+  "months": 3,
+  "needInstalled": false,
+  "confirm": "Terima kasih! Pendaftaran kerabatmu sudah kami terima. Insentif dicairkan bertahap setelah syarat terpenuhi.",
+  "terms": []
+ }
 }
