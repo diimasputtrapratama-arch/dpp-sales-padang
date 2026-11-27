@@ -31,8 +31,16 @@ module.exports=async(q,s)=>{
   let b=q.body||{};if(typeof b==='string')b=JSON.parse(b);
   if(path==='/api/lead'&&m==='POST'){
    if(await rl('rl:l:'+ip,20,3600))return J(429,{error:'Terlalu banyak permintaan'});
-   await r('LPUSH','leads',JSON.stringify({t:Date.now(),nama:str(b.nama,80),wa:str(b.wa,25),alamat:str(b.alamat,400),area:str(b.area,60),paket:str(b.paket,80),lat:str(b.lat,12),lng:str(b.lng,12)}));
-   await r('LTRIM','leads',0,499);await r('HINCRBY','stats','lead',1);return J(200,{ok:1})}
+   const code=/^DPP-[A-Z0-9]{6}$/.test(b.code)?b.code:'DPP-'+c.randomBytes(3).toString('hex').toUpperCase();
+   const rec={code,t:Date.now(),status:'Diterima',nama:str(b.nama,80),wa:str(b.wa,25),alamat:str(b.alamat,400),area:str(b.area,60),paket:str(b.paket,80),lat:str(b.lat,12),lng:str(b.lng,12)};
+   if(await r('SET','lead:'+code,JSON.stringify(rec),'NX')!=='OK')return J(409,{error:'Kode sudah ada'});
+   await r('LPUSH','leads',code);await r('LTRIM','leads',0,499);await r('HINCRBY','stats','lead',1);return J(200,{ok:1,code})}
+  if(path==='/api/track'&&m==='GET'){
+   const cd=str(u.searchParams.get('code'),12).toUpperCase(),tel=str(u.searchParams.get('tel'),20).replace(/\D/g,'');
+   if(await rl('rl:t:'+ip,30,3600))return J(429,{error:'Terlalu banyak permintaan'});
+   const v=/^DPP-[A-Z0-9]{6}$/.test(cd)&&tel.length>=4?await r('GET','lead:'+cd):null,L=v&&JSON.parse(v);
+   if(!L||String(L.wa).replace(/\D/g,'').slice(-4)!==tel.slice(-4))return J(404,{error:'Pesanan tidak ditemukan atau 4 digit nomor tidak cocok'});
+   return J(200,{status:L.status,paket:L.paket,area:L.area,t:L.t})}
   if(path==='/api/event'&&m==='POST'){
    if(await rl('rl:e:'+ip,300,3600))return J(429,{error:'Terlalu banyak permintaan'});
    if(['area','sim','ask'].includes(b.t))await r('HINCRBY','stats',b.t,1);return J(200,{ok:1})}
@@ -45,7 +53,8 @@ module.exports=async(q,s)=>{
   if(path.startsWith('/api/admin/')){
    if(!valid(cookie(q).sid))return J(401,{error:'Belum login'});
    if(path==='/api/admin/stats'&&m==='GET'){const h=await r('HGETALL','stats')||[],st={};for(let i=0;i<h.length;i+=2)st[h[i]]=+h[i+1];
-    return J(200,{stats:st,leads:((await r('LRANGE','leads',0,49))||[]).map(x=>JSON.parse(x))})}
+    const cs=(await r('LRANGE','leads',0,49))||[];const L=cs.length?(await r('MGET',...cs.map(x=>'lead:'+x))).filter(Boolean).map(x=>JSON.parse(x)):[];return J(200,{stats:st,leads:L})}
+   if(path==='/api/admin/lead'&&m==='PUT'){const k='lead:'+str(b.code,12),v=await r('GET',k);if(!v||!['Diterima','Dihubungi','Survei','Jadwal pasang','Terpasang','Batal'].includes(b.status))return J(400,{error:'Data tidak valid'});const L=JSON.parse(v);L.status=b.status;await r('SET',k,JSON.stringify(L));return J(200,{ok:1})}
    if(path==='/api/admin/site'&&m==='PUT'){await r('SET','site',JSON.stringify(clean(b)));return J(200,{ok:1})}
    if(path==='/api/admin/upload'&&m==='POST'){
     const x=/^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(b.data||'');if(!x)return J(400,{error:'Format harus PNG, JPG, atau WebP'});
