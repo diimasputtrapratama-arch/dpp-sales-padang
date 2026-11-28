@@ -215,5 +215,11 @@
  "kab": "Kota Padang",
  "lines": [
   "Reguler"
- ]
+ ],
+ "net": {
+  "ext": 2.5,
+  "buf": 150
+ },
+ "odp": [],
+ "jalur": []
 }
